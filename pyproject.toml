@@ -1,5 +1,9 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "intelligent-dead-reckoning"
+name = "dead-reckoning"
 version = "0.1.0"
 description = "SIH 2026 - Problem 26168 - Deep Inertial Odometry"
 readme = "README.md"
@@ -11,3 +15,6 @@ dependencies = [
     "scipy",
     "onnx"
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]
