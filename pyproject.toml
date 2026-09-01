@@ -1,7 +1,13 @@
 [project]
-name = "dead-reckoning"
+name = "intelligent-dead-reckoning"
 version = "0.1.0"
-description = "Add your description here"
+description = "SIH 2026 - Problem 26168 - Deep Inertial Odometry"
 readme = "README.md"
-requires-python = ">=3.14"
-dependencies = []
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "pandas",
+    "numpy",
+    "scipy",
+    "onnx"
+]
