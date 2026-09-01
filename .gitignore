@@ -1,20 +1,2 @@
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Data
-IO-VNBD/
-*.csv
-*.zip
-
-# Ignore large model files if necessary (though best_tcn_model.pth is small enough, ~1MB for this architecture, we can commit it to show it works)
+*.pth
+!champion_model.pth
