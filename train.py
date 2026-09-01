@@ -198,7 +198,7 @@ class RoNIN_ResNet_LSTM(nn.Module):
 # 4. ADVANCED TRAINING LOOP
 # ==========================================
 def main():
-    print("=== STARTING ADVANCED SOTA TRAINING PIPELINE ===")
+    print("Starting Training Pipeline")
     pull_all_data()
     
     print("Loading and preprocessing all datasets...")

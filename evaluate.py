@@ -76,7 +76,7 @@ with torch.no_grad():
 
 true_speeds_ms = v_val['Velocity (km/hr)'].values / 3.6
 
-# THE SECRET WEAPON: Absolute Phone Orientation (Fused Gyro + Magnetometer by Android OS)
+# Absolute Phone Orientation (Fused Gyro + Magnetometer)
 absolute_heading = np.radians(s_val.iloc[:, 21].values)
 
 print("\nRunning Sensor-Fused Benchmark (< 5% Target)...")
@@ -91,7 +91,7 @@ def run_fused_benchmark(target_distance_m):
         reached_target = False
         
         while i < len(s_val):
-            # SECRET WEAPON: Use Absolute Hardware Heading
+            # Use Absolute Hardware Heading
             current_h = absolute_heading[i]
             
             step_dist = true_speeds_ms[i] * dt
