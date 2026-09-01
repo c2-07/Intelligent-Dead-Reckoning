@@ -59,7 +59,7 @@ val_features = np.clip(val_features, -49.0, 49.0)
 print("Loading Champion AI Model (ResNet-BiLSTM)...")
 model = RoNIN_ResNet_LSTM(in_channels=6)
 # I will checkout the main branch first or just load it from disk since we are on main
-model.load_state_dict(torch.load("champion_model.pth", map_location='cpu', weights_only=True))
+model.load_state_dict(torch.load("models/champion_model.pth", map_location='cpu', weights_only=True))
 model.eval()
 
 print("Generating AI Speed Predictions...")

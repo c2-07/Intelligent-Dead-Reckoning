@@ -1,2 +1,2 @@
-*.pth
-!champion_model.pth
+models/*.pth
+!models/champion_model.pth

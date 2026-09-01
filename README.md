@@ -19,11 +19,11 @@ Empirical testing of multiple architectures was conducted on the ISRO `IO-VNBD` 
 **Conclusion:** The empirical data suggests that 11.5% drift approaches the information-theoretic limit for this specific hardware and dataset configuration. To eliminate the remaining error, this model is designed to act as the core inference engine for a Map-Matching application, which constrains the trajectory to known road networks (e.g., OpenStreetMap).
 
 ## Repository Structure
-* `train.py`: The training pipeline. Downloads the IO-VNBD dataset, applies lag correction, and trains the ResNet-BiLSTM model.
-* `champion_model.pth`: Pre-trained weights for the 11.5% drift model.
-* `evaluate.py`: The benchmark script. Simulates 50m and 1km GPS blackouts across the validation set and calculates exact drift rates using Sensor Fusion.
-* `visualize.py`: Generates a spatial plot (`blackout_simulation.png`) comparing the model's dead reckoning trajectory against the true GPS trajectory.
-* `preprocess_data.py`: Utility script documenting dataset preprocessing, including time lag correction and gravity orientation alignment.
+* `scripts/train.py`: The training pipeline. Downloads the IO-VNBD dataset, applies lag correction, and trains the ResNet-BiLSTM model.
+* `models/champion_model.pth`: Pre-trained weights for the 11.5% drift model.
+* `scripts/evaluate.py`: The benchmark script. Simulates 50m and 1km GPS blackouts across the validation set and calculates exact drift rates using Sensor Fusion.
+* `scripts/visualize.py`: Generates a spatial plot (`blackout_simulation.png`) comparing the model's dead reckoning trajectory against the true GPS trajectory.
+* `scripts/preprocess_data.py`: Utility script documenting dataset preprocessing, including time lag correction and gravity orientation alignment.
 
 ## Usage Instructions
 
@@ -34,23 +34,23 @@ Python must be installed. The `uv` package manager is recommended for execution.
 To test the pre-trained model and compute the drift metrics:
 ```bash
 # Using UV
-uv run --with "torch,pandas,numpy,scipy" python3 evaluate.py
+uv run --with "torch,pandas,numpy,scipy" python3 scripts/evaluate.py
 
 # Standard pip
 pip install torch pandas numpy scipy
-python evaluate.py
+python scripts/evaluate.py
 ```
 *Note: The script automatically downloads the required CSV datasets from the ISRO repository if they are not present locally.*
 
 ### 2. Visualize a GPS Blackout
 To generate a 2D spatial plot of a 60-second GPS blackout:
 ```bash
-python visualize.py
+python scripts/visualize.py
 ```
 This outputs a `blackout_simulation.png` file comparing the True Path to the Fused Path.
 
 ### 3. Train the Model
 To train the `ResNet-BiLSTM` model from scratch:
 ```bash
-python train.py
+python scripts/train.py
 ```
