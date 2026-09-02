@@ -7,16 +7,16 @@ def export_to_onnx():
     model = RoNIN_ResNet_LSTM(in_channels=6)
     
     try:
-        model.load_state_dict(torch.load("models/champion_model.pth", map_location='cpu', weights_only=True))
+        model.load_state_dict(torch.load("models/resnet_bilstm_v1.pth", map_location='cpu', weights_only=True))
     except:
-        model.load_state_dict(torch.load("models/champion_model.pth", map_location='cpu'))
+        model.load_state_dict(torch.load("models/resnet_bilstm_v1.pth", map_location='cpu'))
     
     model.eval()
 
     print("Creating dummy input tensor of shape (1, 6, 50)...")
     dummy_input = torch.randn(1, 6, 50)
 
-    onnx_path = "models/champion_model.onnx"
+    onnx_path = "models/resnet_bilstm_v1.onnx"
     print(f"Exporting to {onnx_path}...")
     
     torch.onnx.export(

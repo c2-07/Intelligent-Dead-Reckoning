@@ -23,4 +23,4 @@ git checkout experiment-trajectory-loss
 # The script handles the git lfs pull automatically
 uv run python scripts/train_trajectory.py
 ```
-If the evaluation proves successful, export the resulting `.pth` to `.onnx` and replace the `champion_model.onnx` in the Flutter App.
+If the evaluation proves successful, export the resulting `.pth` to `.onnx` and replace the `resnet_bilstm_v1.onnx` in the Flutter App.

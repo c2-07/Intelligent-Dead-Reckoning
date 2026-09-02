@@ -65,9 +65,9 @@ def main():
     model = RoNIN_ResNet_LSTM(in_channels=6)
     
     try:
-        model.load_state_dict(torch.load("models/champion_model.pth", map_location='cpu', weights_only=True))
+        model.load_state_dict(torch.load("models/resnet_bilstm_v1.pth", map_location='cpu', weights_only=True))
     except Exception:
-        model.load_state_dict(torch.load("models/champion_model.pth", map_location='cpu'))
+        model.load_state_dict(torch.load("models/resnet_bilstm_v1.pth", map_location='cpu'))
     
     model.eval()
 

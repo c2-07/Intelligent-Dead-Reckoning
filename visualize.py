@@ -70,9 +70,9 @@ def main():
     print("3. Loading the trained Champion Model (ResNet-BiLSTM)...")
     model = RoNIN_ResNet_LSTM(in_channels=6)
     try:
-        model.load_state_dict(torch.load("models/champion_model.pth", map_location='cpu', weights_only=True))
+        model.load_state_dict(torch.load("models/resnet_bilstm_v1.pth", map_location='cpu', weights_only=True))
     except:
-        model.load_state_dict(torch.load("models/champion_model.pth", map_location='cpu'))
+        model.load_state_dict(torch.load("models/resnet_bilstm_v1.pth", map_location='cpu'))
     model.eval()
 
     print("4. Simulating a 60-second GPS Tunnel Blackout...")

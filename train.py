@@ -68,9 +68,9 @@ def main():
         
         if val_loss < best_loss:
             best_loss = val_loss
-            torch.save(model.state_dict(), 'models/champion_model.pth')
+            torch.save(model.state_dict(), 'models/resnet_bilstm_v1.pth')
             
-    print(f"Done in {(time.time()-start_time)/60:.1f} mins. Saved models/champion_model.pth")
+    print(f"Done in {(time.time()-start_time)/60:.1f} mins. Saved models/resnet_bilstm_v1.pth")
 
 if __name__ == "__main__":
     main()
