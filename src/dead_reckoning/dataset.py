@@ -1,10 +1,12 @@
-import os
 import glob
-import pandas as pd
+import os
+import subprocess
+
 import numpy as np
+import pandas as pd
 import torch
 from torch.utils.data import Dataset
-import subprocess
+
 
 def pull_all_data():
     """Downloads the IO-VNBD dataset from GitHub LFS if not present."""
@@ -52,7 +54,7 @@ def process_single_pair(v_path, s_path, lag_samples=9):
         features = np.column_stack((rot_ax, rot_ay, rot_az, rot_groll, rot_gpitch, rot_gyaw))
         labels = v_aligned['Velocity (km/hr)'].values / 3.6
         return features, labels
-    except Exception as e:
+    except Exception:
         # Fails silently for corrupted/LFS pointer files during dataset loading
         return None, None
 

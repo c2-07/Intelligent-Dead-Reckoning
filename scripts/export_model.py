@@ -1,6 +1,8 @@
+
 import torch
-import os
+
 from dead_reckoning.model import RoNIN_ResNet_LSTM
+
 
 def export_to_onnx():
     print("Loading PyTorch model...")
@@ -34,7 +36,7 @@ def export_to_onnx():
         }
     )
     
-    print(f"✅ Successfully exported PyTorch model to ONNX format!")
+    print("✅ Successfully exported PyTorch model to ONNX format!")
     print("This .onnx file can now be loaded natively in Flutter/Android.")
 
 if __name__ == "__main__":

@@ -1,12 +1,14 @@
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader
-from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
-import numpy as np
 import time
 
-from dead_reckoning.model import RoNIN_ResNet_LSTM
+import numpy as np
+import torch
+from torch import nn
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
+from torch.utils.data import DataLoader
+
 from dead_reckoning.dataset import AdvancedIDRDataset, load_all_data, pull_all_data
+from dead_reckoning.model import RoNIN_ResNet_LSTM
+
 
 def main():
     print("Starting Training Pipeline...")

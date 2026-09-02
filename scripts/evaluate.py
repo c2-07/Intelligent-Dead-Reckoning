@@ -1,11 +1,14 @@
 import os
-import torch
+import warnings
+
 import numpy as np
 import pandas as pd
-import warnings
+import torch
+
 warnings.filterwarnings('ignore')
 
 from dead_reckoning.model import RoNIN_ResNet_LSTM
+
 
 def extract_features(s_data):
     """Applies gravity rotation matrix and normalizes IMU inputs."""

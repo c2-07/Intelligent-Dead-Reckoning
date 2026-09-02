@@ -1,5 +1,5 @@
-import torch
-import torch.nn as nn
+from torch import nn
+
 
 class ResBlock1D(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1):

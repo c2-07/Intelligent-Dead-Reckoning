@@ -23,7 +23,7 @@ Empirical testing of multiple architectures was conducted on the ISRO `IO-VNBD` 
 * `models/resnet_bilstm_v1.pth`: Pre-trained weights for the 11.5% drift model.
 * `scripts/evaluate.py`: The benchmark script. Simulates 50m and 1km GPS blackouts across the validation set and calculates exact drift rates using Sensor Fusion.
 * `scripts/visualize.py`: Generates a spatial plot (`blackout_simulation.png`) comparing the model's dead reckoning trajectory against the true GPS trajectory.
-* `scripts/preprocess_data.py`: Utility script documenting dataset preprocessing, including time lag correction and gravity orientation alignment.
+* `src/dead_reckoning/dataset.py`: Contains dataset preprocessing logic, including time lag correction and gravity orientation alignment.
 
 ## Usage Instructions
 
@@ -33,11 +33,11 @@ Python must be installed. The `uv` package manager is recommended for execution.
 ### 1. Run the Evaluation Benchmark
 To test the pre-trained model and compute the drift metrics:
 ```bash
-# Using UV
-uv run --with "torch,pandas,numpy,scipy" python3 scripts/evaluate.py
+# Using UV (automatically handles dependencies)
+uv run scripts/evaluate.py
 
 # Standard pip
-pip install torch pandas numpy scipy
+pip install -e .
 python scripts/evaluate.py
 ```
 *Note: The script automatically downloads the required CSV datasets from the ISRO repository if they are not present locally.*
@@ -45,12 +45,14 @@ python scripts/evaluate.py
 ### 2. Visualize a GPS Blackout
 To generate a 2D spatial plot of a 60-second GPS blackout:
 ```bash
-python scripts/visualize.py
+uv run scripts/visualize.py
+# or: python scripts/visualize.py
 ```
 This outputs a `blackout_simulation.png` file comparing the True Path to the Fused Path.
 
 ### 3. Train the Model
 To train the `ResNet-BiLSTM` model from scratch:
 ```bash
-python scripts/train.py
+uv run scripts/train.py
+# or: python scripts/train.py
 ```
