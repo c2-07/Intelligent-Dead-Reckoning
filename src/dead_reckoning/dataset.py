@@ -77,8 +77,10 @@ class AdvancedIDRDataset(Dataset):
     PyTorch Dataset for Dead Reckoning.
     Creates sliding windows of length `window_size` across the time series.
     """
-    def __init__(self, feature_list, label_list, window_size=50, step=25):
+    def __init__(self, feature_list, label_list, window_size=50, augment=False):
+        self.augment = augment
         self.x, self.y = [], []
+        step = window_size // 2
         for feats, lbls in zip(feature_list, label_list):
             # Clip outlier values
             feats = np.clip(feats, -49.0, 49.0)
@@ -94,9 +96,12 @@ class AdvancedIDRDataset(Dataset):
 
     def __getitem__(self, idx):
         x_win = self.x[idx].copy()
-        # Basic Data Augmentation: Scale injection
-        scale = np.random.uniform(0.9, 1.1, size=(6,))
-        x_win *= scale
-        x_win += np.random.normal(0, 0.05, x_win.shape)
+        
+        if self.augment:
+            # Basic Data Augmentation: Scale injection & Noise
+            scale = np.random.uniform(0.9, 1.1, size=(6,))
+            x_win *= scale
+            x_win += np.random.normal(0, 0.05, x_win.shape)
+            
         # Transpose for PyTorch 1D convolutions: (Channels, Sequence_Length)
         return torch.tensor(x_win).transpose(0, 1), torch.tensor(self.y[idx])

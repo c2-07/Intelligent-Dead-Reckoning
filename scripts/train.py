@@ -23,8 +23,9 @@ def main():
     train_feats, train_lbls = features[:split_idx], labels[:split_idx]
     val_feats, val_lbls = features[split_idx:], labels[split_idx:]
     
-    train_dataset = AdvancedIDRDataset(train_feats, train_lbls, step=25)
-    val_dataset = AdvancedIDRDataset(val_feats, val_lbls, step=25)
+    train_dataset = AdvancedIDRDataset(train_feats, train_lbls, augment=True)
+    val_dataset = AdvancedIDRDataset(val_feats, val_lbls, augment=False)
+    
     train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=256, shuffle=False)
     
@@ -32,13 +33,16 @@ def main():
     print(f"Using device: {device}")
     
     model = RoNIN_ResNet_LSTM().to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
     
-    epochs = 43
+    # Huber Loss is robust to extreme pothole/sensor outliers
+    criterion = nn.SmoothL1Loss()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=1e-4)
     scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2)
-    criterion = nn.HuberLoss(delta=1.0)
     
+    epochs = 100
+    patience = 15
     best_loss = float('inf')
+    epochs_no_improve = 0
     start_time = time.time()
     
     for epoch in range(epochs):
@@ -54,6 +58,7 @@ def main():
             train_loss += loss.item()
             
         scheduler.step()
+        train_loss /= len(train_loader)
         
         model.eval()
         val_loss = 0.0
@@ -63,14 +68,21 @@ def main():
                 pred = model(x)
                 loss = criterion(pred, y)
                 val_loss += loss.item()
+        val_loss /= len(val_loader)
                 
-        train_rmse = np.sqrt(train_loss / len(train_loader) * 2) * 3.6
-        val_rmse = np.sqrt(val_loss / len(val_loader) * 2) * 3.6
-        print(f"Epoch {epoch+1:02d} | Train RMSE: {train_rmse:.2f} km/h | Val RMSE: {val_rmse:.2f} km/h")
+        train_rmse = np.sqrt(train_loss * 2) * 3.6
+        val_rmse = np.sqrt(val_loss * 2) * 3.6
+        print(f"Epoch {epoch+1:02d}/{epochs} | Train Error: ~{train_rmse:.2f} km/h | Val Error: ~{val_rmse:.2f} km/h")
         
         if val_loss < best_loss:
             best_loss = val_loss
+            epochs_no_improve = 0
             torch.save(model.state_dict(), 'models/resnet_bilstm_latest.pth')
+        else:
+            epochs_no_improve += 1
+            if epochs_no_improve >= patience:
+                print(f"Early stopping triggered! No improvement for {patience} epochs.")
+                break
             
     print(f"Done in {(time.time()-start_time)/60:.1f} mins. Saved models/resnet_bilstm_latest.pth")
 
