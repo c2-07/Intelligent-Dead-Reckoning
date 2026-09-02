@@ -20,7 +20,7 @@ Empirical testing of multiple architectures was conducted on the ISRO `IO-VNBD` 
 
 ## Repository Structure
 * `scripts/train.py`: The training pipeline. Downloads the IO-VNBD dataset, applies lag correction, and trains the ResNet-BiLSTM model.
-* `models/champion_model.pth`: Pre-trained weights for the 11.5% drift model.
+* `models/resnet_bilstm_v1.pth`: Pre-trained weights for the 11.5% drift model.
 * `scripts/evaluate.py`: The benchmark script. Simulates 50m and 1km GPS blackouts across the validation set and calculates exact drift rates using Sensor Fusion.
 * `scripts/visualize.py`: Generates a spatial plot (`blackout_simulation.png`) comparing the model's dead reckoning trajectory against the true GPS trajectory.
 * `scripts/preprocess_data.py`: Utility script documenting dataset preprocessing, including time lag correction and gravity orientation alignment.
