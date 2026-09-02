@@ -20,13 +20,19 @@ warnings.filterwarnings('ignore')
 # 1. ROBUST DATA PREPROCESSING (unchanged from original commit)
 # ==========================================
 def pull_all_data():
+    # Check if the dataset already exists with actual CSV data
+    check_dir = "IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/"
+    if os.path.exists(check_dir) and len(glob.glob(os.path.join(check_dir, "**", "*.csv"), recursive=True)) > 10:
+        print("IO-VNBD dataset already present, skipping download.")
+        return
+    
     print("Pulling entire IO-VNBD dataset (This will take a moment)...")
     subprocess.run("sudo apt-get update && sudo apt-get install -y git-lfs", shell=True, check=False)
     if not os.path.exists("IO-VNBD"):
         subprocess.run("git clone https://github.com/onyekpeu/IO-VNBD", shell=True, check=True)
     
     os.chdir("IO-VNBD")
-    subprocess.run("git lfs install", shell=True, check=True)
+    subprocess.run("git lfs install --force", shell=True, check=True)
     subprocess.run("git lfs pull --include='**/*.csv'", shell=True, check=True)
     os.chdir("..")
 
