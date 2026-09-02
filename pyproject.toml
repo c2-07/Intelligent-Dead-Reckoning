@@ -13,7 +13,9 @@ dependencies = [
     "pandas",
     "numpy",
     "scipy",
-    "onnx"
+    "onnx",
+    "matplotlib",
+    "matplotlib>=3.10.9",
 ]
 
 [tool.setuptools.packages.find]
