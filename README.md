@@ -56,3 +56,29 @@ To train the `ResNet-BiLSTM` model from scratch:
 uv run scripts/train.py
 # or: python scripts/train.py
 ```
+
+### 4. Running on Google Colab
+You can easily train and evaluate this model using a free GPU on Google Colab:
+1. Create a new notebook in [Google Colab](https://colab.research.google.com/).
+2. Change the runtime to GPU (**Runtime** > **Change runtime type** > **T4 GPU**).
+3. Paste and run the following snippet in a cell:
+
+```python
+# Clone the repository
+!git clone https://github.com/c2-07/Intelligent-Dead-Reckoning-SIH.git
+%cd Intelligent-Dead-Reckoning-SIH
+
+# Pull the ISRO dataset via Git LFS
+!git lfs install
+!git lfs pull
+
+# Setup the python environment with `uv`
+!pip install uv
+!uv pip install -e . --system
+
+# Train the model
+!uv run scripts/train.py
+
+# Evaluate the model
+!uv run scripts/evaluate.py
+```
