@@ -4,11 +4,13 @@
 The Machine Learning pipeline for the ISRO Deep Inertial Odometry (Dead Reckoning) project is **100% complete and production-ready**. 
 The repository has been fully refactored from messy exploratory scripts into a professional, modular Python package. 
 
-### The Champion Model
+### The Models
 * **Architecture:** ResNet-1D + BiLSTM (`RoNIN_ResNet_LSTM`)
-* **Performance:** 11.52% Distance Drift over 1km GPS blackouts.
+* **v2 (Latest):** 10.11m avg error over 50m segments, 13.52% drift over 1km. Trained as a reproducibility test.
+* **v1 (Original):** 11.52m avg error over 50m segments, 17.75% drift over 1km.
 * **Weights:** 
-  * `models/resnet_bilstm_v1.pth` (PyTorch training weights)
+  * `models/resnet_bilstm_v2.pth` (PyTorch, latest)
+  * `models/resnet_bilstm_v1.pth` (PyTorch, original)
   * `models/resnet_bilstm_v1.onnx` (Optimized for Android/Flutter Edge Inference)
 
 ## 2. Repository Layout (Refactored)

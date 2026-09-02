@@ -40,7 +40,7 @@ def extract_features(s_data):
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Evaluate Dead Reckoning Model")
-    parser.add_argument("--model", type=str, default="models/resnet_bilstm_v1.pth", help="Path to model weights")
+    parser.add_argument("--model", type=str, default="models/resnet_bilstm_v2.pth", help="Path to model weights")
     args = parser.parse_args()
 
     print("Loading data for Absolute Heading Benchmark...")
