@@ -38,6 +38,11 @@ def extract_features(s_data):
     return np.column_stack((rot_ax, rot_ay, rot_az, rot_groll, rot_gpitch, rot_gyaw))
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Evaluate Dead Reckoning Model")
+    parser.add_argument("--model", type=str, default="models/resnet_bilstm_v1.pth", help="Path to model weights")
+    args = parser.parse_args()
+
     print("Loading data for Absolute Heading Benchmark...")
 
     v_path = "IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/M (Driver B)/V-M.csv"
@@ -64,13 +69,13 @@ def main():
     val_features = extract_features(s_val)
     val_features = np.clip(val_features, -49.0, 49.0)
 
-    print("Loading Champion AI Model (ResNet-BiLSTM)...")
+    print(f"Loading AI Model from {args.model}...")
     model = RoNIN_ResNet_LSTM(in_channels=6)
     
     try:
-        model.load_state_dict(torch.load("models/resnet_bilstm_v1.pth", map_location='cpu', weights_only=True))
+        model.load_state_dict(torch.load(args.model, map_location='cpu', weights_only=True))
     except Exception:
-        model.load_state_dict(torch.load("models/resnet_bilstm_v1.pth", map_location='cpu'))
+        model.load_state_dict(torch.load(args.model, map_location='cpu'))
     
     model.eval()
 

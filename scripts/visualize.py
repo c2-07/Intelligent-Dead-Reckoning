@@ -38,8 +38,14 @@ def extract_features(s_data):
 
     return np.column_stack((rot_ax, rot_ay, rot_az, rot_groll, rot_gpitch, rot_gyaw))
 
+import argparse
+
 def main():
-    print("1. Loading the aligned dataset...")
+    parser = argparse.ArgumentParser(description="Visualize Dead Reckoning Path")
+    parser.add_argument("--model", type=str, default="models/resnet_bilstm_v1.pth", help="Path to model weights")
+    args = parser.parse_args()
+
+    # Load 60 seconds of True GPS + Smartphone data
     v_path = "IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/M (Driver B)/V-M.csv"
     s_path = "IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/M (Driver B)/S-M.csv"
 
@@ -56,26 +62,30 @@ def main():
     v_aligned = v_df.iloc[:-lag_samples].reset_index(drop=True)
     s_aligned = s_df.iloc[lag_samples:].reset_index(drop=True)
 
-    # Use a specific chunk of the validation set to simulate a blackout
-    split_idx = int(len(v_aligned) * 0.8)
-    
-    # Let's pick a 60-second segment where the car is actively driving and turning
-    duration = 600 # 60 seconds at 10Hz
-    start_idx = split_idx + 1000 
-    
-    v_val = v_aligned.iloc[start_idx : start_idx + duration].reset_index(drop=True)
-    s_val = s_aligned.iloc[start_idx : start_idx + duration].reset_index(drop=True)
+    # Pick a 60-second window during a straight+turn segment (e.g., sample 1500 to 2100)
+    start_idx = 1500
+    end_idx = 2100
+    if end_idx > len(s_aligned):
+        start_idx = 0
+        end_idx = min(600, len(s_aligned))
 
-    print("2. Extracting AI features...")
+    v_val = v_aligned.iloc[start_idx:end_idx].reset_index(drop=True)
+    s_val = s_aligned.iloc[start_idx:end_idx].reset_index(drop=True)
+    duration = end_idx - start_idx
+
+    # Extract Features for the window
+    print("Extracting features for 60s blackout visualization...")
     val_features = extract_features(s_val)
     val_features = np.clip(val_features, -49.0, 49.0)
 
-    print("3. Loading the trained Champion Model (ResNet-BiLSTM)...")
+    # Load Model
+    print(f"Loading Model from {args.model}...")
     model = RoNIN_ResNet_LSTM(in_channels=6)
     try:
-        model.load_state_dict(torch.load("models/resnet_bilstm_v1.pth", map_location='cpu', weights_only=True))
-    except:
-        model.load_state_dict(torch.load("models/resnet_bilstm_v1.pth", map_location='cpu'))
+        model.load_state_dict(torch.load(args.model, map_location='cpu', weights_only=True))
+    except Exception:
+        model.load_state_dict(torch.load(args.model, map_location='cpu'))
+    
     model.eval()
 
     print("4. Simulating a 60-second GPS Tunnel Blackout...")

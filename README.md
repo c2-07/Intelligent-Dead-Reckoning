@@ -76,9 +76,9 @@ You can easily train and evaluate this model using a free GPU on Google Colab:
 !pip install uv
 !uv pip install -e . --system
 
-# Train the model
+# Train the model (saves to models/resnet_bilstm_latest.pth)
 !uv run scripts/train.py
 
-# Evaluate the model
-!uv run scripts/evaluate.py
+# Evaluate the newly trained model
+!uv run scripts/evaluate.py --model models/resnet_bilstm_latest.pth
 ```
