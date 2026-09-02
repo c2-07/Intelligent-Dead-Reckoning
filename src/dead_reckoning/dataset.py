@@ -60,7 +60,7 @@ def process_single_pair(v_path, s_path, lag_samples=9):
 
 def load_all_data(base_dir="IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/"):
     """Loads all V and S CSV pairs from the dataset directory."""
-    folders = glob.glob(os.path.join(base_dir, "*"))
+    folders = sorted(glob.glob(os.path.join(base_dir, "*")))
     all_features, all_labels = [], []
     for folder in folders:
         v_files = sorted(glob.glob(os.path.join(folder, "**", "V-*.csv"), recursive=True))

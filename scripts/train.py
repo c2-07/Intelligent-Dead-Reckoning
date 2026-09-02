@@ -12,6 +12,14 @@ from dead_reckoning.model import RoNIN_ResNet_LSTM
 
 def main():
     print("Starting Training Pipeline...")
+    
+    # Set seed for reproducibility
+    seed = 42
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
     pull_all_data()
     features, labels = load_all_data()
     
