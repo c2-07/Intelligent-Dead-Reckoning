@@ -1,5 +1,6 @@
 models/*.pth
 !models/resnet_bilstm_v1.pth
 !models/resnet_bilstm_v2.pth
+!models/resnet_bilstm_v3.pth
 IO-VNBD/
 IO-VNBD-Dataset.zip

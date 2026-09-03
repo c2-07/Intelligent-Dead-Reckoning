@@ -6,10 +6,12 @@ The repository has been fully refactored from messy exploratory scripts into a p
 
 ### The Models
 * **Architecture:** ResNet-1D + BiLSTM (`RoNIN_ResNet_LSTM`)
-* **v2 (Latest):** 10.11m avg error over 50m segments, 13.52% drift over 1km. Trained as a reproducibility test.
+* **v3 (Latest/Deterministic):** 8.86m avg error over 50m segments, 12.26% drift over 1km.
+* **v2 (Reproduced):** 10.11m avg error over 50m segments, 13.52% drift over 1km.
 * **v1 (Original):** 11.52m avg error over 50m segments, 17.75% drift over 1km.
 * **Weights:** 
-  * `models/resnet_bilstm_v2.pth` (PyTorch, latest)
+  * `models/resnet_bilstm_v3.pth` (PyTorch, canonical deterministic model)
+  * `models/resnet_bilstm_v2.pth` (PyTorch, reproduced)
   * `models/resnet_bilstm_v1.pth` (PyTorch, original)
   * `models/resnet_bilstm_v1.onnx` (Optimized for Android/Flutter Edge Inference)
 

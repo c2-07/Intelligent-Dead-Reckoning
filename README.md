@@ -13,10 +13,11 @@ When a vehicle loses GPS signal, the system relies on the smartphone's internal 
 
 | Model | File | 50m Avg Error | 1km Avg Error | 50m Drift | 1km Drift |
 |---|---|---|---|---|---|
-| **v2 (Latest)** | `models/resnet_bilstm_v2.pth` | 10.11m | 135.32m | 19.90% | 13.52% |
+| **v3 (Deterministic)** | `models/resnet_bilstm_v3.pth` | **8.86m** | **122.69m** | **17.43%** | **12.26%** |
+| v2 (Reproduced) | `models/resnet_bilstm_v2.pth` | 10.11m | 135.32m | 19.90% | 13.52% |
 | v1 (Original) | `models/resnet_bilstm_v1.pth` | 11.52m | 177.56m | 22.70% | 17.75% |
 
-Both models use the same `RoNIN_ResNet_LSTM` architecture. The v2 model was trained as a reproducibility test using identical code and hyperparameters, demonstrating that the training pipeline produces consistent results across runs.
+All models use the same `RoNIN_ResNet_LSTM` architecture. The **v3 model** is the canonical production model, trained using the fully deterministic pipeline (`seed=42`, `cudnn.deterministic=True`) ensuring bit-exact reproducibility across runs.
 
 ## Research and Optimization
 Empirical testing of multiple architectures was conducted on the ISRO `IO-VNBD` dataset. The experiments are documented across the branches of this repository:
@@ -31,8 +32,9 @@ Empirical testing of multiple architectures was conducted on the ISRO `IO-VNBD` 
 
 ## Repository Structure
 * `scripts/train.py`: The training pipeline. Downloads the IO-VNBD dataset, applies lag correction, and trains the ResNet-BiLSTM model.
-* `models/resnet_bilstm_v1.pth`: Pre-trained weights (v1, original training run).
+* `models/resnet_bilstm_v3.pth`: Pre-trained weights (v3, fully deterministic run).
 * `models/resnet_bilstm_v2.pth`: Pre-trained weights (v2, reproducibility test).
+* `models/resnet_bilstm_v1.pth`: Pre-trained weights (v1, original training run).
 * `models/resnet_bilstm_v1.onnx`: ONNX export optimized for Android/Flutter edge inference.
 * `scripts/evaluate.py`: The benchmark script. Simulates 50m and 1km GPS blackouts across the validation set and calculates exact drift rates using Sensor Fusion.
 * `scripts/visualize.py`: Generates a spatial plot (`blackout_simulation.png`) comparing the model's dead reckoning trajectory against the true GPS trajectory.
@@ -95,6 +97,6 @@ You can easily train and evaluate this model using a free GPU on Google Colab:
 # Evaluate the newly trained model
 !uv run scripts/evaluate.py --model models/resnet_bilstm_latest.pth
 
-# Or evaluate the pre-trained v2 model
-!uv run scripts/evaluate.py --model models/resnet_bilstm_v2.pth
+# Or evaluate the pre-trained deterministic v3 model
+!uv run scripts/evaluate.py --model models/resnet_bilstm_v3.pth
 ```
