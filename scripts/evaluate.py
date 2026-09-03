@@ -100,13 +100,15 @@ def main():
 
     def run_fused_benchmark(target_distance_m):
         errors, drift_rates = [], []
-        i = window_size
-        while i < len(s_val):
+        stride = 10
+        # Start at window_size, step by stride
+        for start_i in range(window_size, len(s_val), stride):
             true_x, true_y = 0.0, 0.0
             ai_x, ai_y = 0.0, 0.0
             dist_traveled = 0.0
             reached_target = False
             
+            i = start_i
             while i < len(s_val):
                 current_h = absolute_heading[i]
                 
@@ -137,6 +139,8 @@ def main():
     if err_50:
         print(f"Total 50m segments evaluated: {len(err_50)}")
         print(f"Average Position Error: {np.mean(err_50):.2f}m")
+        print(f"Median Position Error: {np.median(err_50):.2f}m")
+        print(f"P90 Position Error: {np.percentile(err_50, 90):.2f}m")
         print(f"Pass Rate (<5m error): {np.mean(np.array(err_50) < 5.0)*100:.1f}%")
 
     print("\n--- BENCHMARK 2: < 100m drift over 1km ---")
@@ -144,13 +148,19 @@ def main():
     if err_1000:
         print(f"Total 1km segments evaluated: {len(err_1000)}")
         print(f"Average Position Error: {np.mean(err_1000):.2f}m")
+        print(f"Median Position Error: {np.median(err_1000):.2f}m")
+        print(f"P90 Position Error: {np.percentile(err_1000, 90):.2f}m")
         print(f"Pass Rate (<100m error): {np.mean(np.array(err_1000) < 100.0)*100:.1f}%")
 
     print("\n--- BENCHMARK 3: Drift rate ---")
     if drift_50:
         print(f"Average Drift Rate (50m segments): {np.mean(drift_50):.2f}%")
+        print(f"Median Drift Rate (50m segments): {np.median(drift_50):.2f}%")
+        print(f"P90 Drift Rate (50m segments): {np.percentile(drift_50, 90):.2f}%")
     if drift_1000:
         print(f"Average Drift Rate (1km segments): {np.mean(drift_1000):.2f}%")
+        print(f"Median Drift Rate (1km segments): {np.median(drift_1000):.2f}%")
+        print(f"P90 Drift Rate (1km segments): {np.percentile(drift_1000, 90):.2f}%")
 
 if __name__ == "__main__":
     main()

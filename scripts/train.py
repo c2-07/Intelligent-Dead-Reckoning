@@ -10,6 +10,10 @@ from dead_reckoning.dataset import AdvancedIDRDataset, load_all_data, pull_all_d
 from dead_reckoning.model import RoNIN_ResNet_LSTM
 
 
+def worker_init_fn(worker_id):
+    np.random.seed(42 + worker_id)
+
+
 def main():
     print("Starting Training Pipeline...")
     
@@ -24,15 +28,15 @@ def main():
     torch.use_deterministic_algorithms(True, warn_only=True)
 
     pull_all_data()
-    features, labels = load_all_data()
     
-    if len(features) == 0:
+    # Strict Trip-Level Split (Leave "M (Driver B)" out for validation)
+    # This ensures zero data leakage between training trips and the validation trip.
+    train_feats, train_lbls = load_all_data(exclude_trip="M (Driver B)")
+    val_feats, val_lbls = load_all_data(include_trip="M (Driver B)")
+    
+    if len(train_feats) == 0 or len(val_feats) == 0:
         print("Error: No data loaded. Did Git LFS pull successfully?")
         return
-
-    split_idx = int(len(features) * 0.8)
-    train_feats, train_lbls = features[:split_idx], labels[:split_idx]
-    val_feats, val_lbls = features[split_idx:], labels[split_idx:]
     
     train_dataset = AdvancedIDRDataset(train_feats, train_lbls, augment=True)
     val_dataset = AdvancedIDRDataset(val_feats, val_lbls, augment=False)
@@ -40,9 +44,6 @@ def main():
     # Seeded generator for deterministic shuffle order
     g = torch.Generator()
     g.manual_seed(seed)
-    
-    def worker_init_fn(worker_id):
-        np.random.seed(seed + worker_id)
     
     train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True,
                               num_workers=2, generator=g, worker_init_fn=worker_init_fn)
@@ -97,14 +98,14 @@ def main():
         if val_loss < best_loss:
             best_loss = val_loss
             epochs_no_improve = 0
-            torch.save(model.state_dict(), 'models/resnet_bilstm_latest.pth')
+            torch.save(model.state_dict(), 'models/resnet_bilstm_v4.pth')
         else:
             epochs_no_improve += 1
             if epochs_no_improve >= patience:
                 print(f"Early stopping triggered! No improvement for {patience} epochs.")
                 break
             
-    print(f"Done in {(time.time()-start_time)/60:.1f} mins. Saved models/resnet_bilstm_latest.pth")
+    print(f"Done in {(time.time()-start_time)/60:.1f} mins. Saved models/resnet_bilstm_v4.pth")
 
 if __name__ == "__main__":
     main()

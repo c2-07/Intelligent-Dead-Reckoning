@@ -61,11 +61,15 @@ def process_single_pair(v_path, s_path, lag_samples=9):
     except Exception as e:
         return None, None
 
-def load_all_data():
+def load_all_data(exclude_trip=None, include_trip=None):
     base_dir = "IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/"
-    folders = glob.glob(os.path.join(base_dir, "*"))
+    folders = sorted(glob.glob(os.path.join(base_dir, "*")))
     all_features, all_labels = [], []
     for folder in folders:
+        folder_name = os.path.basename(folder)
+        if exclude_trip and exclude_trip in folder_name: continue
+        if include_trip and include_trip not in folder_name: continue
+        
         v_files = sorted(glob.glob(os.path.join(folder, "**", "V-*.csv"), recursive=True))
         s_files = sorted(glob.glob(os.path.join(folder, "**", "S-*.csv"), recursive=True))
         for v_path, s_path in zip(v_files, s_files):
@@ -98,7 +102,7 @@ class AdvancedIDRDataset(Dataset):
         if self.augment:
             scale = np.random.uniform(0.9, 1.1, size=(6,))
             x_win *= scale
-            x_win += np.random.normal(0, 0.1, x_win.shape)
+            x_win += np.random.normal(0, 0.05, x_win.shape)
         return torch.tensor(x_win).transpose(0, 1), torch.tensor(self.y[idx])
 
 # ==========================================
@@ -155,9 +159,8 @@ class RoNIN_ResNet_LSTM(nn.Module):
 # TRAIN (from scripts/train.py)
 # ==========================================
 def train_model():
-    print("=== DETERMINISTIC TRAINING: Colab T4 GPU ===")
+    print("=== DETERMINISTIC TRAINING: Colab T4 GPU (STRICT HELD-OUT SPLIT) ===")
     
-    # Full deterministic mode for bit-exact reproducibility
     seed = 42
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -168,15 +171,18 @@ def train_model():
     torch.use_deterministic_algorithms(True, warn_only=True)
 
     pull_all_data()
-    features, labels = load_all_data()
-    print(f"Loaded {len(features)} CSV sequences.")
-    if len(features) == 0:
+    
+    # STRICT TRIP-LEVEL SPLIT to prevent data leakage
+    print("Loading Training Data (Excluding M (Driver B))...")
+    train_feats, train_lbls = load_all_data(exclude_trip="M (Driver B)")
+    print("Loading Validation Data (Only M (Driver B))...")
+    val_feats, val_lbls = load_all_data(include_trip="M (Driver B)")
+    
+    print(f"Loaded {len(train_feats)} training trips, {len(val_feats)} validation trips.")
+
+    if len(train_feats) == 0:
         print("ERROR: No data loaded.")
         return None
-
-    split_idx = int(len(features) * 0.8)
-    train_feats, train_lbls = features[:split_idx], labels[:split_idx]
-    val_feats, val_lbls = features[split_idx:], labels[split_idx:]
 
     train_dataset = AdvancedIDRDataset(train_feats, train_lbls, augment=True)
     val_dataset = AdvancedIDRDataset(val_feats, val_lbls, augment=False)
@@ -237,7 +243,7 @@ def train_model():
         if val_loss < best_loss:
             best_loss = val_loss
             epochs_no_improve = 0
-            torch.save(model.state_dict(), 'colab_trained_model.pth')
+            torch.save(model.state_dict(), 'colab_trained_model_v4.pth')
         else:
             epochs_no_improve += 1
             if epochs_no_improve >= patience:
@@ -245,115 +251,9 @@ def train_model():
                 break
 
     print(f"Done in {(time.time()-start_time)/60:.1f} mins.")
-    model.load_state_dict(torch.load('colab_trained_model.pth', map_location=device, weights_only=True))
+    model.load_state_dict(torch.load('colab_trained_model_v4.pth', map_location=device, weights_only=True))
     return model
-
-# ==========================================
-# EVALUATE (from scripts/evaluate.py)
-# ==========================================
-def extract_features(s_data):
-    gx, gy, gz = s_data['GRAVITY X (m/s²)'].values, s_data['GRAVITY Y (m/s²)'].values, s_data['GRAVITY Z (m/s²)'].values
-    ax, ay, az = s_data['ACCELEROMETER X (m/s²)'].values, s_data['ACCELEROMETER Y (m/s²)'].values, s_data['ACCELEROMETER Z (m/s²)'].values
-    groll, gpitch, gyaw = s_data['GYROSCOPE Roll (rad/s)'].values, s_data['GYROSCOPE Pitch (rad/s)'].values, s_data['GYROSCOPE Yaw (rad/s)'].values
-    rot_ax, rot_ay, rot_az = np.zeros_like(ax), np.zeros_like(ay), np.zeros_like(az)
-    rot_groll, rot_gpitch, rot_gyaw = np.zeros_like(groll), np.zeros_like(gpitch), np.zeros_like(gyaw)
-    for i in range(len(s_data)):
-        g_vec = np.array([gx[i], gy[i], gz[i]])
-        g_norm = np.linalg.norm(g_vec)
-        if g_norm < 0.1: continue
-        g_normed = g_vec / g_norm
-        target_g = np.array([0, 0, 1])
-        v = np.cross(g_normed, target_g)
-        c = np.dot(g_normed, target_g)
-        s = np.linalg.norm(v)
-        if s < 1e-6: rot_matrix = np.eye(3)
-        else:
-            kmat = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
-            rot_matrix = np.eye(3) + kmat + kmat.dot(kmat) * ((1 - c) / (s ** 2))
-        rot_ax[i], rot_ay[i], rot_az[i] = rot_matrix.dot(np.array([ax[i], ay[i], az[i]]))
-        rot_groll[i], rot_gpitch[i], rot_gyaw[i] = rot_matrix.dot(np.array([groll[i], gpitch[i], gyaw[i]]))
-    return np.column_stack((rot_ax, rot_ay, rot_az, rot_groll, rot_gpitch, rot_gyaw))
-
-def evaluate_model(model):
-    print("\n" + "="*60)
-    print("EVALUATION BENCHMARK")
-    print("="*60)
-    v_path = "IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/M (Driver B)/V-M.csv"
-    s_path = "IO-VNBD/Synchronised V abd S datasets/Categorised IOVNB Dataset/M (Driver B)/S-M.csv"
-    v_df = pd.read_csv(v_path)
-    s_df = pd.read_csv(s_path, encoding='latin-1')
-    v_df.columns = v_df.columns.str.strip()
-    s_df.columns = s_df.columns.str.strip()
-    lag_samples = 9
-    v_aligned = v_df.iloc[:-lag_samples].reset_index(drop=True)
-    s_aligned = s_df.iloc[lag_samples:].reset_index(drop=True)
-    split_idx = int(len(v_aligned) * 0.8)
-    v_val = v_aligned.iloc[split_idx:].reset_index(drop=True)
-    s_val = s_aligned.iloc[split_idx:].reset_index(drop=True)
-    print(f"Validation set: {len(s_val)} frames (~{len(s_val)/600:.1f} min)")
-
-    val_features = extract_features(s_val)
-    val_features = np.clip(val_features, -49.0, 49.0)
-    model.eval()
-    model = model.cpu()
-    window_size = 50
-    dt = 0.1
-    ai_speeds_ms = np.zeros(len(s_val))
-    with torch.no_grad():
-        for i in range(window_size - 1, len(s_val)):
-            x_window = val_features[i - window_size + 1 : i + 1]
-            x_tensor = torch.tensor(x_window, dtype=torch.float32).transpose(0, 1).unsqueeze(0)
-            pred = model(x_tensor).item()
-            ai_speeds_ms[i] = max(0, pred)
-    true_speeds_ms = v_val['Velocity (km/hr)'].values / 3.6
-    absolute_heading = np.radians(s_val.iloc[:, 21].values)
-
-    def run_fused_benchmark(target_distance_m):
-        errors, drift_rates = [], []
-        i = window_size
-        while i < len(s_val):
-            true_x, true_y, ai_x, ai_y, dist_traveled = 0.0, 0.0, 0.0, 0.0, 0.0
-            reached_target = False
-            while i < len(s_val):
-                current_h = absolute_heading[i]
-                step_dist = true_speeds_ms[i] * dt
-                true_x += step_dist * np.cos(current_h)
-                true_y += step_dist * np.sin(current_h)
-                dist_traveled += step_dist
-                ai_step = ai_speeds_ms[i] * dt
-                ai_x += ai_step * np.cos(current_h)
-                ai_y += ai_step * np.sin(current_h)
-                i += 1
-                if dist_traveled >= target_distance_m:
-                    reached_target = True
-                    break
-            if reached_target:
-                error_m = np.sqrt((true_x - ai_x)**2 + (true_y - ai_y)**2)
-                errors.append(error_m)
-                drift_rates.append((error_m / dist_traveled) * 100)
-            else: break
-        return errors, drift_rates
-
-    print("\n--- BENCHMARK 1: < 5m drift over 50m ---")
-    err_50, drift_50 = run_fused_benchmark(50.0)
-    print(f"Total 50m segments: {len(err_50)}")
-    print(f"Average Position Error: {np.mean(err_50):.2f}m")
-    print(f"Pass Rate (<5m): {np.mean(np.array(err_50) < 5.0)*100:.1f}%")
-
-    print("\n--- BENCHMARK 2: < 100m drift over 1km ---")
-    err_1000, drift_1000 = run_fused_benchmark(1000.0)
-    if err_1000:
-        print(f"Total 1km segments: {len(err_1000)}")
-        print(f"Average Position Error: {np.mean(err_1000):.2f}m")
-        print(f"Pass Rate (<100m): {np.mean(np.array(err_1000) < 100.0)*100:.1f}%")
-
-    print("\n--- BENCHMARK 3: Drift rate ---")
-    print(f"Drift Rate (50m): {np.mean(drift_50):.2f}%")
-    if drift_1000:
-        print(f"Drift Rate (1km): {np.mean(drift_1000):.2f}%")
-    print("="*60)
 
 if __name__ == "__main__":
     model = train_model()
-    if model:
-        evaluate_model(model)
+    print("Training finished. File saved as colab_trained_model_v4.pth")

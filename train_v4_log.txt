@@ -1,0 +1,40 @@
+Starting Training Pipeline...
+Using device: mps
+Epoch 01/100 | Train Error: ~12.41 km/h | Val Error: ~8.65 km/h
+Epoch 02/100 | Train Error: ~10.28 km/h | Val Error: ~8.54 km/h
+Epoch 03/100 | Train Error: ~9.80 km/h | Val Error: ~9.79 km/h
+Epoch 04/100 | Train Error: ~9.42 km/h | Val Error: ~9.02 km/h
+Epoch 05/100 | Train Error: ~9.20 km/h | Val Error: ~7.75 km/h
+Epoch 06/100 | Train Error: ~9.05 km/h | Val Error: ~7.67 km/h
+Epoch 07/100 | Train Error: ~8.93 km/h | Val Error: ~7.67 km/h
+Epoch 08/100 | Train Error: ~8.83 km/h | Val Error: ~7.84 km/h
+Epoch 09/100 | Train Error: ~8.75 km/h | Val Error: ~7.64 km/h
+Epoch 10/100 | Train Error: ~8.70 km/h | Val Error: ~7.66 km/h
+Epoch 11/100 | Train Error: ~8.94 km/h | Val Error: ~10.21 km/h
+Epoch 12/100 | Train Error: ~8.89 km/h | Val Error: ~7.79 km/h
+Epoch 13/100 | Train Error: ~8.79 km/h | Val Error: ~11.20 km/h
+Epoch 14/100 | Train Error: ~8.69 km/h | Val Error: ~8.15 km/h
+Epoch 15/100 | Train Error: ~8.61 km/h | Val Error: ~8.49 km/h
+Epoch 16/100 | Train Error: ~8.52 km/h | Val Error: ~10.29 km/h
+Epoch 17/100 | Train Error: ~8.42 km/h | Val Error: ~10.06 km/h
+Epoch 18/100 | Train Error: ~8.35 km/h | Val Error: ~9.81 km/h
+Epoch 19/100 | Train Error: ~8.26 km/h | Val Error: ~10.33 km/h
+Epoch 20/100 | Train Error: ~8.15 km/h | Val Error: ~7.94 km/h
+Epoch 21/100 | Train Error: ~8.07 km/h | Val Error: ~7.32 km/h
+Epoch 22/100 | Train Error: ~7.95 km/h | Val Error: ~8.44 km/h
+Epoch 23/100 | Train Error: ~7.83 km/h | Val Error: ~8.58 km/h
+Epoch 24/100 | Train Error: ~7.71 km/h | Val Error: ~9.02 km/h
+Epoch 25/100 | Train Error: ~7.63 km/h | Val Error: ~7.61 km/h
+Epoch 26/100 | Train Error: ~7.53 km/h | Val Error: ~7.87 km/h
+Epoch 27/100 | Train Error: ~7.49 km/h | Val Error: ~7.61 km/h
+Epoch 28/100 | Train Error: ~7.42 km/h | Val Error: ~7.94 km/h
+Epoch 29/100 | Train Error: ~7.38 km/h | Val Error: ~7.83 km/h
+Epoch 30/100 | Train Error: ~7.37 km/h | Val Error: ~7.93 km/h
+Epoch 31/100 | Train Error: ~7.94 km/h | Val Error: ~9.70 km/h
+Epoch 32/100 | Train Error: ~7.88 km/h | Val Error: ~8.82 km/h
+Epoch 33/100 | Train Error: ~7.87 km/h | Val Error: ~11.41 km/h
+Epoch 34/100 | Train Error: ~7.77 km/h | Val Error: ~10.85 km/h
+Epoch 35/100 | Train Error: ~7.75 km/h | Val Error: ~10.17 km/h
+Epoch 36/100 | Train Error: ~7.66 km/h | Val Error: ~8.24 km/h
+Early stopping triggered! No improvement for 15 epochs.
+Done in 14.4 mins. Saved models/resnet_bilstm_v4.pth
