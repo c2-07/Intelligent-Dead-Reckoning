@@ -13,12 +13,15 @@ from dead_reckoning.model import RoNIN_ResNet_LSTM
 def main():
     print("Starting Training Pipeline...")
     
-    # Set seed for reproducibility
+    # Full deterministic mode for bit-exact reproducibility
     seed = 42
     torch.manual_seed(seed)
     np.random.seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    torch.use_deterministic_algorithms(True, warn_only=True)
 
     pull_all_data()
     features, labels = load_all_data()
@@ -34,8 +37,17 @@ def main():
     train_dataset = AdvancedIDRDataset(train_feats, train_lbls, augment=True)
     val_dataset = AdvancedIDRDataset(val_feats, val_lbls, augment=False)
     
-    train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=256, shuffle=False)
+    # Seeded generator for deterministic shuffle order
+    g = torch.Generator()
+    g.manual_seed(seed)
+    
+    def worker_init_fn(worker_id):
+        np.random.seed(seed + worker_id)
+    
+    train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True,
+                              num_workers=2, generator=g, worker_init_fn=worker_init_fn)
+    val_loader = DataLoader(val_dataset, batch_size=256, shuffle=False,
+                            num_workers=2, worker_init_fn=worker_init_fn)
     
     device = torch.device('mps' if torch.backends.mps.is_available() else ('cuda' if torch.cuda.is_available() else 'cpu'))
     print(f"Using device: {device}")
